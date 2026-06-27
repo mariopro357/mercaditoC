@@ -9,6 +9,8 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
 <body>
 
   <!-- ── TOPBAR ─────────────────────────────────────────────── -->
@@ -199,5 +201,12 @@
   <!-- Scripts -->
   <script src="auth.js"></script>
   <script src="index.js"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log("Service Worker registrado con éxito"))
+      .catch((err) => console.log("Error en Service Worker", err));
+  }
+</script>
 </body>
 </html>
