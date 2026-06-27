@@ -27,6 +27,7 @@ function renderCard(p) {
     <article class="prod-card" data-id="${p.id}">
       <div class="prod-thumb">
         ${imgContent}
+        ${p.categoria ? `<span class="cat-tag">${escHTML(p.categoria)}</span>` : ""}
       </div>
       <div class="prod-body">
         <h3 class="prod-title">${escHTML(p.titulo)}</h3>
@@ -69,8 +70,10 @@ async function cargarProductos(query = "", categoria = "todos") {
       q = q.ilike("titulo", `%${query}%`);
     }
 
-    // Filtrar por categoría en cliente (ya que no existe columna en DB)
-    // Se elimina el filtro q.eq("categoria", ...) para evitar el error de Supabase
+    // Filtrar por categoría
+    if (categoria && categoria !== "todos") {
+      q = q.eq("categoria", categoria);
+    }
 
     // Ordenar por más recientes
     q = q.order("created_at", { ascending: false });

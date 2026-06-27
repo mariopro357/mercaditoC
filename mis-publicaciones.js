@@ -31,7 +31,7 @@ async function loadMyProducts() {
 
   const { data, error } = await supabase
     .from("productos")
-    .select("id, titulo, precio, imagen_url")
+    .select("id, titulo, precio, categoria, imagen_url")
     .eq("vendedor_id", currentUser.id)
     .order("created_at", { ascending: false });
 
@@ -60,6 +60,7 @@ async function loadMyProducts() {
         <div class="mc-img-wrap">
           ${imgHTML}
         </div>
+        <div class="mc-cat">${escHTML(p.categoria || "Sin categoría")}</div>
         <div class="mc-title">${escHTML(p.titulo)}</div>
         <div class="mc-price">${formatPrice(p.precio)}</div>
         <button class="delete-btn" data-id="${p.id}" data-url="${imgSrc}" aria-label="Eliminar ${escHTML(p.titulo)}">

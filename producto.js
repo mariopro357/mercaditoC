@@ -46,7 +46,7 @@ async function loadProductDetails() {
     // 3. Llenar la interfaz
     document.title = `${producto.titulo} — MercaditoC`;
     
-    document.getElementById('bread-cat').textContent = 'Producto';
+    document.getElementById('bread-cat').textContent = producto.categoria || 'Sin categoría';
     document.getElementById('bread-title').textContent = producto.titulo;
     
     const imgEl = document.getElementById('prod-img');
@@ -61,7 +61,7 @@ async function loadProductDetails() {
       imgEl.style.display = 'none';
     }
 
-    document.getElementById('prod-cat').textContent = 'Producto';
+    document.getElementById('prod-cat').textContent = producto.categoria || '';
     document.getElementById('prod-titulo').textContent = producto.titulo;
     document.getElementById('prod-precio').textContent = formatPrice(producto.precio);
     

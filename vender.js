@@ -127,6 +127,7 @@ async function handleSubmit(e) {
     const { error: dbError } = await supabase.from("productos").insert([{
       titulo:      titulo,
       precio:      precio,
+      categoria:   categoria,
       descripcion: descripcion,
       imagen_url:  publicUrl,
       vendedor_id: currentUser.id,   // ← imprescindible para mostrar en perfil y contactar

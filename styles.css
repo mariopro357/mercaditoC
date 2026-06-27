@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    MercaditoC â€” Global Stylesheet
    Paleta: blanco / gris claro / azul sÃ³lido (#3483fa) / amarillo (#ffe600)
    EstÃ©tica: e-commerce clÃ¡sico, limpio, claro, profesional
@@ -254,8 +254,21 @@ img { max-width: 100%; display: block; }
   align-items: start;
 }
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
+  .layout { 
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar { 
+    display: block;
+    position: static;
+    order: 2; /* Muestra los filtros y la tarjeta de donación debajo de los productos en móvil */
+    margin-top: 32px;
+    width: 100%;
+  }
+  .main {
+    order: 1;
+    width: 100%;
+  }
 }
 
 /* â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
