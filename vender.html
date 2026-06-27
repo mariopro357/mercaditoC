@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicar Producto — MercaditoC</title>
+  <meta name="description" content="Publica tu producto en MercaditoC y llega a miles de compradores de tu comunidad." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Estilos extra para la página de vender ── */
+    .vender-wrap {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px 60px;
+    }
+    .vender-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .vender-header h1 { font-size: 22px; font-weight: 800; }
+    .vender-header a {
+      font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 5px;
+      transition: color var(--transition);
+    }
+    .vender-header a:hover { color: var(--brand); }
+
+    .vender-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+    }
+    .vender-card h2 {
+      font-size: 17px; font-weight: 700;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .vf-group { margin-bottom: 20px; }
+    .vf-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text); margin-bottom: 7px;
+    }
+    .vf-group input,
+    .vf-group select,
+    .vf-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px; color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      background: #fff;
+    }
+    .vf-group input:focus,
+    .vf-group select:focus,
+    .vf-group textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(52,131,250,.12);
+    }
+    .vf-group textarea { resize: vertical; min-height: 100px; }
+
+    /* Preview de imagen */
+    .img-preview-wrap {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      background: #fafbfc;
+      position: relative;
+    }
+    .img-preview-wrap:hover { border-color: var(--brand); background: #f0f6ff; }
+    .img-preview-wrap input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .img-preview-wrap .preview-placeholder { pointer-events: none; }
+    .img-preview-wrap .preview-placeholder .icon { font-size: 36px; margin-bottom: 8px; }
+    .img-preview-wrap .preview-placeholder p { font-size: 13px; color: var(--muted); margin: 0; }
+    .img-preview-wrap .preview-placeholder strong { color: var(--brand); }
+
+    #img-preview-img {
+      display: none;
+      max-height: 200px;
+      width: auto;
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 0 auto;
+      pointer-events: none;
+    }
+
+    .btn-publicar {
+      width: 100%;
+      padding: 14px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--transition);
+      margin-top: 8px;
+      position: relative;
+    }
+    .btn-publicar:hover:not(:disabled) { background: var(--brand-dk); }
+    .btn-publicar:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-publicar.loading { color: transparent; }
+    .btn-publicar.loading::after {
+      content: '';
+      position: absolute; inset: 0; margin: auto;
+      width: 22px; height: 22px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .vender-alert {
+      display: none;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 18px;
+    }
+    .vender-alert.error   { display: block; background: #fff0f0; border: 1px solid #ffd0d0; color: var(--danger); }
+    .vender-alert.success { display: block; background: #f0fff7; border: 1px solid #b3f0d1; color: var(--success); }
+
+    /* Bloque de protección (visible si no hay sesión) */
+    #auth-guard {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    #auth-guard .guard-icon { font-size: 52px; margin-bottom: 16px; }
+    #auth-guard h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+    #auth-guard p  { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    #auth-guard a  {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-weight: 700; font-size: 14px;
+    }
+    #auth-guard a:hover { background: var(--brand-dk); }
+
+    #form-vender-container { display: none; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ── TOPBAR ─────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="row">
+      <a href="index.html" class="logo" aria-label="MercaditoC — inicio">
+        <div class="logo-mark" aria-hidden="true">M</div>
+        MercaditoC
+      </a>
+
+      <!-- Sin sesión -->
+      <nav class="nav-auth" id="nav-auth" style="margin-left:auto;">
+        <a href="registro.html" class="btn-nav">Registrarse</a>
+        <a href="login.html"    class="btn-nav btn-nav-sell">Iniciar sesión</a>
+      </nav>
+
+      <!-- Con sesión -->
+      <nav class="nav-user" id="nav-user" style="margin-left:auto;">
+        <a href="index.html" class="btn-nav">← Ver tienda</a>
+        <div class="user-menu-wrapper">
+          <button class="btn-user-menu" id="btn-user-menu" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar" id="nav-avatar" aria-hidden="true">U</div>
+            <span id="nav-nombre">Mi cuenta</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" role="menu">
+            <div class="dd-header">
+              <div class="dd-avatar" id="dd-avatar" aria-hidden="true">U</div>
+              <div>
+                <div class="dd-name"  id="dd-nombre">Usuario</div>
+                <div class="dd-email" id="dd-email">correo@ejemplo.com</div>
+              </div>
+            </div>
+            <ul>
+              <li><a href="perfil.html" role="menuitem">👤 Mi perfil</a></li>
+              <li><a href="mis-publicaciones.html" role="menuitem">🏷️ Mis publicaciones</a></li>
+              <li class="dd-divider" role="separator"></li>
+              <li><button id="btn-logout" class="dd-logout" role="menuitem">🚪 Cerrar sesión</button></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- ── CONTENIDO ──────────────────────────────────────────── -->
+  <div class="vender-wrap">
+    <div class="vender-header">
+      <h1>🏷️ Publicar producto</h1>
+      <a href="index.html">← Volver a la tienda</a>
+    </div>
+
+    <!-- Guard: mostrado si no hay sesión -->
+    <div id="auth-guard">
+      <div class="guard-icon">🔒</div>
+      <h2>Inicia sesión para publicar</h2>
+      <p>Necesitas una cuenta para poder publicar productos en MercaditoC.</p>
+      <a href="login.html">Iniciar sesión</a>
+    </div>
+
+    <!-- Formulario: mostrado cuando hay sesión -->
+    <div id="form-vender-container">
+      <div class="vender-card">
+        <h2>📦 Información del producto</h2>
+
+        <div id="vender-alert" class="vender-alert" role="alert"></div>
+
+        <form id="form-vender" novalidate>
+
+          <div class="vf-group">
+            <label for="titulo">Título del producto <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="titulo" placeholder="Ej: iPhone 14 Pro 256GB — negro" maxlength="120" required />
+          </div>
+
+          <div class="vf-group">
+            <label for="precio">Precio (en tu moneda local) <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="precio" placeholder="Ej: 5000" min="0" step="any" required />
+          </div>
+
+          <div class="vf-group">
+            <label for="categoria">Categoría <span style="color:var(--danger)">*</span></label>
+            <select id="categoria" required>
+              <option value="" disabled selected>Selecciona una categoría…</option>
+              <option value="Electrónica">📱 Electrónica</option>
+              <option value="Ropa">👗 Ropa</option>
+              <option value="Hogar">🏠 Hogar</option>
+              <option value="Deportes">⚽ Deportes</option>
+              <option value="Juguetes">🧸 Juguetes</option>
+              <option value="Alimentos">🍎 Alimentos</option>
+              <option value="Vehículos">🚗 Vehículos</option>
+              <option value="Servicios">🔧 Servicios</option>
+              <option value="Otros">📦 Otros</option>
+            </select>
+          </div>
+
+          <div class="vf-group">
+            <label for="descripcion">Descripción (opcional)</label>
+            <textarea id="descripcion" placeholder="Describe el estado, características, incluye o no accesorios, etc."></textarea>
+          </div>
+
+          <div class="vf-group">
+            <label>Imagen del producto <span style="color:var(--danger)">*</span></label>
+            <div class="img-preview-wrap" id="img-drop-zone">
+              <input type="file" id="imagen" accept="image/*" required />
+              <div class="preview-placeholder" id="preview-placeholder">
+                <div class="icon">📷</div>
+                <p>Haz clic o arrastra una imagen aquí</p>
+                <p><strong>JPG, PNG, WEBP</strong> — máx. 5 MB</p>
+              </div>
+              <img id="img-preview-img" alt="Vista previa" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-publicar" id="btn-publicar">
+            Publicar producto
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="vender.js"></script>
+</body>
+</html>

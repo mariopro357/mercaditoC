@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MercaditoC — Compra y vende en tu comunidad</title>
+  <meta name="description" content="MercaditoC: el mercado local donde puedes comprar y vender productos de manera fácil, rápida y segura." />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ── TOPBAR ─────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="row">
+
+      <!-- Logo -->
+      <a href="index.html" class="logo" aria-label="MercaditoC — inicio">
+        <div class="logo-mark" aria-hidden="true">M</div>
+        MercaditoC
+      </a>
+
+      <!-- Buscador -->
+      <form class="search-form" id="search-form" role="search" action="#" method="GET">
+        <input
+          type="search"
+          id="q"
+          name="q"
+          placeholder="Buscar productos, marcas, categorías..."
+          aria-label="Buscar productos"
+          autocomplete="off"
+        />
+        <button type="submit" aria-label="Buscar">Buscar</button>
+      </form>
+
+      <!-- Estado: No autenticado -->
+      <nav class="nav-auth" id="nav-auth" aria-label="Acceso">
+        <a href="registro.html" class="btn-nav" id="btn-registrarse">Registrarse</a>
+        <a href="login.html"    class="btn-nav btn-nav-sell" id="btn-iniciar-sesion">Iniciar sesión</a>
+      </nav>
+
+      <!-- Estado: Autenticado -->
+      <nav class="nav-user" id="nav-user" aria-label="Mi cuenta">
+        <a href="vender.html" class="btn-nav btn-nav-sell" id="btn-vender">
+          <span>+ Vender</span>
+        </a>
+        <div class="user-menu-wrapper">
+          <button class="btn-user-menu" id="btn-user-menu" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar" id="nav-avatar" aria-hidden="true">U</div>
+            <span id="nav-nombre">Usuario</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M2 4l4 4 4-4"/></svg>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" role="menu">
+            <div class="dd-header">
+              <div class="dd-avatar" id="dd-avatar" aria-hidden="true">U</div>
+              <div>
+                <div class="dd-name"  id="dd-nombre">Usuario</div>
+                <div class="dd-email" id="dd-email">correo@ejemplo.com</div>
+              </div>
+            </div>
+            <ul>
+              <li><a href="perfil.html"  role="menuitem">👤 Mi perfil</a></li>
+              <li><a href="mis-publicaciones.html"  role="menuitem">🏷️ Mis publicaciones</a></li>
+              <li class="dd-divider" role="separator"></li>
+              <li>
+                <button id="btn-logout" class="dd-logout" role="menuitem">
+                  🚪 Cerrar sesión
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ── SUB-NAV: Categorías ─────────────────────────────────── -->
+  <nav class="cat-bar" aria-label="Categorías">
+    <div class="row">
+      <button class="cat-pill active" data-cat="todos"       aria-pressed="true" >🛍️ Todos</button>
+      <button class="cat-pill"        data-cat="Electrónica" aria-pressed="false">📱 Electrónica</button>
+      <button class="cat-pill"        data-cat="Ropa"        aria-pressed="false">👗 Ropa</button>
+      <button class="cat-pill"        data-cat="Hogar"       aria-pressed="false">🏠 Hogar</button>
+      <button class="cat-pill"        data-cat="Deportes"    aria-pressed="false">⚽ Deportes</button>
+      <button class="cat-pill"        data-cat="Juguetes"    aria-pressed="false">🧸 Juguetes</button>
+      <button class="cat-pill"        data-cat="Alimentos"   aria-pressed="false">🍎 Alimentos</button>
+      <button class="cat-pill"        data-cat="Vehículos"   aria-pressed="false">🚗 Vehículos</button>
+      <button class="cat-pill"        data-cat="Servicios"   aria-pressed="false">🔧 Servicios</button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ──────────────────────────────────────────────────── -->
+  <section class="hero" aria-label="Bienvenida">
+    <h1>Compra y vende en tu comunidad 🛒</h1>
+    <p>Miles de productos disponibles cerca de ti. ¡Encuentra lo que buscas o publica lo que ya no usas!</p>
+  </section>
+
+  <!-- ── MAIN LAYOUT ─────────────────────────────────────────── -->
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Filtros">
+      <div class="filter-panel">
+        <div class="fp-title">
+          🔽 Filtrar resultados
+        </div>
+        <div class="fp-body">
+          <div class="fp-group">
+            <div class="fp-label">Ordenar por</div>
+            <select class="fp-select" id="sort-select" aria-label="Ordenar productos">
+              <option value="reciente">Más recientes</option>
+              <option value="precio_asc">Precio: menor a mayor</option>
+              <option value="precio_desc">Precio: mayor a menor</option>
+              <option value="az">Nombre A → Z</option>
+            </select>
+          </div>
+          <div class="fp-group">
+            <div class="fp-label">Condición</div>
+            <div class="fp-radios">
+              <label><input type="radio" name="condicion" value="todos" checked /> Todos</label>
+              <label><input type="radio" name="condicion" value="nuevo"  /> Nuevos</label>
+              <label><input type="radio" name="condicion" value="usado"  /> Usados</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Donation Card -->
+      <div class="donation-card" style="margin-top: 24px; padding: 20px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); text-align: center;">
+        <h4 style="margin-bottom: 12px; color: var(--brand); font-size: 16px; font-weight: 800;">Apoya a MercaditoC 💙</h4>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5;">Esta plataforma es gratuita para tu comunidad. Si deseas colaborar con el mantenimiento y funcionamiento, tu aporte es bienvenido:</p>
+        <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 13px; text-align: left; color: var(--text); border: 1px solid var(--border);">
+          <div style="font-weight: 700; margin-bottom: 6px; color: var(--brand); font-size: 14px;">Pago Móvil (BNC)</div>
+          <div>Cédula: <strong>17.777.393</strong></div>
+          <div style="margin-top: 4px;">Teléfono: <strong>0416 584 3196</strong></div>
+        </div>
+        <p style="font-size: 11px; color: var(--muted); margin-top: 12px; font-style: italic;">¡Gracias por hacer esto posible!</p>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main" id="main-content" role="main">
+      <div class="section-bar">
+        <h2>Productos disponibles</h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="result-count" id="result-count">Cargando…</span>
+        </div>
+      </div>
+
+      <!-- Products grid (se llena dinámicamente con index.js) -->
+      <div class="products-grid" id="products-grid" aria-live="polite" aria-label="Lista de productos">
+        <!-- Skeletons de carga iniciales -->
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton sk-thumb"></div><div class="sk-body"><div class="skeleton sk-line w-60"></div><div class="skeleton sk-line w-80"></div><div class="skeleton sk-line w-40"></div></div></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+  <footer class="footer" role="contentinfo">
+    <div class="inner">
+      <div>
+        <div class="footer-brand">MercaditoC</div>
+        <p>Tu mercado local digital.<br/>Compra seguro, vende fácil.</p>
+      </div>
+      <div>
+        <h4>Comprar</h4>
+        <a href="#">Cómo comprar</a>
+        <a href="#">Categorías</a>
+        <a href="#">Ofertas del día</a>
+      </div>
+      <div>
+        <h4>Vender</h4>
+        <a href="registro.html">Crear cuenta</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="vender.html">Publicar producto</a>
+      </div>
+      <div>
+        <h4>Ayuda</h4>
+        <a href="mailto:mtoro1114@gmail.com?subject=Ayuda%20MercaditoC">Centro de ayuda</a>
+        <a href="mailto:mtoro1114@gmail.com?subject=Contacto%20MercaditoC">Contáctanos</a>
+        <a href="politicas.html">Política de privacidad</a>
+      </div>
+    </div>
+    <div class="copy">© 2025 MercaditoC. Todos los derechos reservados.</div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Publicaciones — MercaditoC</title>
+  <meta name="description" content="Administra tus publicaciones en MercaditoC." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .mis-publicaciones-wrap {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+    
+    .panel-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .panel-card .pc-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-card .pc-body { padding: 20px; }
+
+    .my-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+    
+    .mini-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      position: relative;
+      transition: box-shadow var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .mini-card:hover { box-shadow: var(--shadow); }
+    .mc-img-wrap {
+      width: 100%;
+      height: 140px;
+      background: #f8f9fa;
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mc-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .mini-card .mc-cat {
+      font-size: 11px; font-weight: 700;
+      color: var(--brand); text-transform: uppercase;
+      letter-spacing: .4px; margin-bottom: 4px;
+    }
+    .mini-card .mc-title {
+      font-size: 14px; font-weight: 700;
+      color: var(--text); line-height: 1.3;
+      margin-bottom: 8px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex-grow: 1;
+    }
+    .mini-card .mc-price {
+      font-size: 16px; font-weight: 800;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .delete-btn {
+      width: 100%;
+      padding: 9px;
+      background: #fff0f0;
+      color: var(--danger);
+      border: 1px solid #ffd0d0;
+      border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .delete-btn:hover { background: #ffe0e0; }
+
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h1 { font-size: 22px; font-weight: 800; }
+    .page-header a {
+      font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 5px;
+      transition: color var(--transition);
+    }
+    .page-header a:hover { color: var(--brand); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: var(--bg);">
+
+  <!-- Topbar -->
+  <header class="topbar" role="banner">
+    <div class="row">
+      <a href="index.html" class="logo" aria-label="MercaditoC — inicio">
+        <div class="logo-mark" aria-hidden="true">M</div>
+        MercaditoC
+      </a>
+      <nav class="nav-auth" id="nav-auth" style="margin-left:auto;">
+        <a href="registro.html" class="btn-nav">Registrarse</a>
+        <a href="login.html"    class="btn-nav btn-nav-sell">Iniciar sesión</a>
+      </nav>
+      <nav class="nav-user" id="nav-user" style="margin-left:auto;">
+        <a href="vender.html" class="btn-nav btn-nav-sell">+ Vender</a>
+        <div class="user-menu-wrapper">
+          <button class="btn-user-menu" id="btn-user-menu" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar" id="nav-avatar">U</div>
+            <span id="nav-nombre">Mi cuenta</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M2 4l4 4 4-4"/></svg>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" role="menu">
+            <div class="dd-header">
+              <div class="dd-avatar" id="dd-avatar">U</div>
+              <div>
+                <div class="dd-name"  id="dd-nombre">Usuario</div>
+                <div class="dd-email" id="dd-email">correo@ejemplo.com</div>
+              </div>
+            </div>
+            <ul>
+              <li><a href="perfil.html" role="menuitem">👤 Mi perfil</a></li>
+              <li><a href="mis-publicaciones.html" role="menuitem">🏷️ Mis publicaciones</a></li>
+              <li class="dd-divider" role="separator"></li>
+              <li><button id="btn-logout" class="dd-logout" role="menuitem">🚪 Cerrar sesión</button></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <div class="mis-publicaciones-wrap">
+    <div class="page-header">
+      <h1>🏷️ Mis Publicaciones</h1>
+      <a href="index.html">← Volver a la tienda</a>
+    </div>
+
+    <div class="panel-card">
+      <div class="pc-header">
+        Tus productos activos
+        <a href="vender.html" class="btn-nav btn-nav-sell" style="font-size: 13px; padding: 6px 12px;">+ Nuevo Producto</a>
+      </div>
+      <div class="pc-body">
+        <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+          Administra los artículos que tienes en venta. Si eliminas una publicación, dejará de aparecer en la tienda.
+        </p>
+        <div id="my-products-container" class="my-products-grid">
+          <p style="color:#999;font-size:14px;">Cargando tus productos…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="mis-publicaciones.js"></script>
+</body>
+</html>

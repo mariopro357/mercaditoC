@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Perfil — MercaditoC</title>
+  <meta name="description"
+    content="Administra tu perfil de vendedor en MercaditoC: nombre, número de WhatsApp y ubicación." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Estilos extra solo para perfil ────────────────────── */
+    .perfil-wrap {
+      max-width: 1060px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+
+    .perfil-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      /* Centrar el perfil sin la tabla de productos al lado */
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Panel card */
+    .panel-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel-card .pc-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-card .pc-body {
+      padding: 20px;
+    }
+
+    /* Avatar grande */
+    .profile-avatar-big {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .profile-email-display {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    /* Campos del formulario */
+    .pf-group {
+      margin-bottom: 18px;
+    }
+
+    .pf-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .pf-group input {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .pf-group input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(52, 131, 250, .12);
+    }
+
+    .pf-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .pf-hint strong {
+      color: var(--text);
+    }
+
+    /* WhatsApp field highlight */
+    .wa-field-wrap {
+      position: relative;
+    }
+
+    .wa-field-wrap .wa-prefix {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .wa-field-wrap input {
+      padding-left: 38px;
+    }
+
+    /* Save button */
+    .btn-save-profile {
+      width: 100%;
+      padding: 12px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .btn-save-profile:hover:not(:disabled) {
+      background: var(--brand-dk);
+    }
+
+    .btn-save-profile:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    /* Page header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .page-header a {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color var(--transition);
+    }
+
+    .page-header a:hover {
+      color: var(--brand);
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body style="background: var(--bg);">
+
+  <!-- Topbar reutilizada de index.html -->
+  <header class="topbar" role="banner">
+    <div class="row">
+      <a href="index.html" class="logo" aria-label="MercaditoC — inicio">
+        <div class="logo-mark" aria-hidden="true">M</div>
+        MercaditoC
+      </a>
+      <!-- Nav auth (auth.js la controla) -->
+      <nav class="nav-auth" id="nav-auth" style="margin-left:auto;">
+        <a href="registro.html" class="btn-nav">Registrarse</a>
+        <a href="login.html" class="btn-nav btn-nav-sell">Iniciar sesión</a>
+      </nav>
+      <nav class="nav-user" id="nav-user" style="margin-left:auto;">
+        <a href="index.html" class="btn-nav">← Volver a la tienda</a>
+        <div class="user-menu-wrapper">
+          <button class="btn-user-menu" id="btn-user-menu" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar" id="nav-avatar">U</div>
+            <span id="nav-nombre">Mi cuenta</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M2 4l4 4 4-4" />
+            </svg>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" role="menu">
+            <div class="dd-header">
+              <div class="dd-avatar" id="dd-avatar">U</div>
+              <div>
+                <div class="dd-name" id="dd-nombre">Usuario</div>
+                <div class="dd-email" id="dd-email">correo@ejemplo.com</div>
+              </div>
+            </div>
+            <ul>
+              <li><a href="perfil.html" role="menuitem">👤 Mi perfil</a></li>
+              <li><a href="mis-publicaciones.html" role="menuitem">🏷️ Mis publicaciones</a></li>
+              <li class="dd-divider" role="separator"></li>
+              <li><button id="btn-logout" class="dd-logout" role="menuitem">🚪 Cerrar sesión</button></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- Contenido principal -->
+  <div class="perfil-wrap">
+
+    <div class="page-header">
+      <h1>⚙️ Mi Perfil de Vendedor</h1>
+      <a href="index.html">← Volver a la tienda</a>
+    </div>
+
+    <div class="perfil-grid">
+
+      <!-- ── Panel izquierdo: datos del vendedor ── -->
+      <aside>
+        <div class="panel-card">
+          <div class="pc-header">👤 Mis datos</div>
+          <div class="pc-body">
+
+            <!-- Avatar generado con iniciales -->
+            <div class="profile-avatar-big" id="profile-avatar-big" aria-hidden="true">U</div>
+            <p class="profile-email-display" id="profile-email">—</p>
+
+            <form id="form-profile-data" novalidate>
+
+              <div class="pf-group">
+                <label for="prof-name">Nombre o apodo</label>
+                <input type="text" id="prof-name" placeholder="Ej: Juan Pérez" autocomplete="name" />
+              </div>
+
+              <!-- Campo WhatsApp destacado -->
+              <div class="pf-group">
+                <label for="prof-phone">
+                  📱 Número de WhatsApp
+                  <span style="color:var(--success); font-size:11px; font-weight:800; margin-left:4px;">
+                    IMPORTANTE
+                  </span>
+                </label>
+                <div class="wa-field-wrap">
+                  <span class="wa-prefix">📞</span>
+                  <input type="tel" id="prof-phone" placeholder="Ej: 5215512345678" autocomplete="tel"
+                    inputmode="numeric" />
+                </div>
+                <p class="pf-hint">
+                  Ingresa tu número en formato internacional <strong>sin espacios ni símbolos</strong>.<br />
+                  Ejemplos: <strong>5215512345678</strong> (México) · <strong>584121234567</strong> (Venezuela)<br />
+                  Este número se usará cuando un comprador haga clic en "Chat" en tus productos.
+                </p>
+              </div>
+
+              <div class="pf-group">
+                <label for="prof-location">📍 Ubicación</label>
+                <input type="text" id="prof-location" placeholder="Ej: Ciudad de México, CDMX"
+                  autocomplete="address-level2" />
+              </div>
+
+              <button type="submit" class="btn-save-profile" id="btn-save-profile">
+                Guardar cambios
+              </button>
+
+            </form>
+          </div>
+        </div>
+      </aside>
+
+      <!-- (El panel derecho de 'mis productos' fue movido a mis-publicaciones.html) -->
+    </div>
+  </div>
+
+  <!-- Scripts: CDN → auth.js → profile.js -->
+  <script src="auth.js"></script>
+  <script src="profile.js"></script>
+
+  <!-- Rellenar avatar con iniciales una vez cargado el perfil -->
+  <script>
+    // Sincronizar avatar grande con el que genera auth.js
+    const observer = new MutationObserver(() => {
+      const navAvatar = document.getElementById("nav-avatar");
+      const bigAvatar = document.getElementById("profile-avatar-big");
+      if (navAvatar && bigAvatar && navAvatar.textContent !== "U") {
+        bigAvatar.textContent = navAvatar.textContent;
+        observer.disconnect();
+      }
+    });
+    const navAv = document.getElementById("nav-avatar");
+    if (navAv) observer.observe(navAv, { childList: true, subtree: true, characterData: true });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión — MercaditoC</title>
+  <meta name="description" content="Inicia sesión en MercaditoC para comprar y vender productos en tu comunidad." />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-page">
+
+  <!-- Mini topbar -->
+  <header class="auth-topbar">
+    <a href="index.html" class="logo" aria-label="Volver al inicio">
+      <div class="logo-mark" aria-hidden="true">M</div>
+      MercaditoC
+    </a>
+  </header>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- Main auth area -->
+  <main class="auth-main">
+    <div class="auth-box">
+
+      <div class="auth-header">
+        <div class="auth-icon" aria-hidden="true">🔐</div>
+        <h2>Bienvenido de vuelta</h2>
+        <p class="auth-subtitle">Inicia sesión para acceder a tu cuenta</p>
+      </div>
+
+      <!-- Alert de feedback -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="polite"></div>
+
+      <form id="form-login" novalidate>
+        <div class="form-field">
+          <label for="login-email">Correo electrónico</label>
+          <input
+            type="email"
+            id="login-email"
+            name="email"
+            placeholder="tu@correo.com"
+            required
+            autocomplete="email"
+          />
+          <div class="field-error" id="err-email">Ingresa un correo válido.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="login-password">Contraseña</label>
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            placeholder="Tu contraseña"
+            required
+            autocomplete="current-password"
+          />
+          <div class="field-error" id="err-password">La contraseña no puede estar vacía.</div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-login-submit">
+          Iniciar sesión
+        </button>
+      </form>
+
+      <div class="auth-link-row">
+        ¿No tienes cuenta? <a href="registro.html">Regístrate gratis</a>
+      </div>
+      <div class="auth-link-row" style="margin-top:8px;">
+        <a href="index.html" style="color: var(--muted); font-weight:400; font-size:13px;">← Volver al inicio</a>
+      </div>
+
+      <div class="trust-row">
+        <span class="trust-badge">🔒 Conexión segura</span>
+        <span>·</span>
+        <span class="trust-badge">✅ Datos protegidos</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script de autenticación -->
+  <script src="auth.js"></script>
+  <script>
+    // ─── login.html inline logic ───────────────────────────────
+    (function () {
+      const form      = document.getElementById("form-login");
+      const emailEl   = document.getElementById("login-email");
+      const passEl    = document.getElementById("login-password");
+      const submitBtn = document.getElementById("btn-login-submit");
+      const alertBox  = document.getElementById("auth-alert");
+
+      function showAlert(msg, type = "error") {
+        alertBox.className = `auth-alert ${type}`;
+        alertBox.textContent = msg;
+      }
+      function clearAlert() {
+        alertBox.className = "auth-alert";
+        alertBox.textContent = "";
+      }
+      function setLoading(on) {
+        submitBtn.disabled = on;
+        submitBtn.classList.toggle("loading", on);
+        if (!on) submitBtn.textContent = "Iniciar sesión";
+      }
+      function validateField(el, errId, test) {
+        const ok = test(el.value);
+        el.classList.toggle("error", !ok);
+        const errEl = document.getElementById(errId);
+        if (errEl) errEl.classList.toggle("show", !ok);
+        return ok;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearAlert();
+
+        const emailOk = validateField(emailEl, "err-email", (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+        const passOk  = validateField(passEl,  "err-password", (v) => v.length >= 1);
+        if (!emailOk || !passOk) return;
+
+        setLoading(true);
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email:    emailEl.value.trim(),
+            password: passEl.value,
+          });
+          if (error) throw error;
+
+          showAlert("¡Sesión iniciada correctamente! Redirigiendo…", "success");
+          setTimeout(() => { window.location.href = "index.html"; }, 800);
+        } catch (err) {
+          const msg = err.message.includes("Invalid login credentials")
+            ? "Correo o contraseña incorrectos."
+            : err.message;
+          showAlert(msg, "error");
+          setLoading(false);
+        }
+      });
+
+      // Limpiar error al escribir
+      [emailEl, passEl].forEach(el => {
+        el.addEventListener("input", () => {
+          el.classList.remove("error");
+          clearAlert();
+        });
+      });
+
+      // Si ya hay sesión activa, redirigir
+      document.addEventListener("DOMContentLoaded", async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) window.location.href = "index.html";
+      });
+    })();
+  </script>
+</body>
+</html>

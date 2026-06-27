@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear cuenta — MercaditoC</title>
+  <meta name="description" content="Crea tu cuenta gratis en MercaditoC y empieza a comprar o vender en tu comunidad." />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-page">
+
+  <!-- Mini topbar -->
+  <header class="auth-topbar">
+    <a href="index.html" class="logo" aria-label="Volver al inicio">
+      <div class="logo-mark" aria-hidden="true">M</div>
+      MercaditoC
+    </a>
+  </header>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <!-- Main auth area -->
+  <main class="auth-main">
+    <div class="auth-box">
+
+      <div class="auth-header">
+        <div class="auth-icon" aria-hidden="true">🎉</div>
+        <h2>Crea tu cuenta gratis</h2>
+        <p class="auth-subtitle">Únete a miles de vendedores y compradores locales</p>
+      </div>
+
+      <!-- Alert de feedback -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="polite"></div>
+
+      <form id="form-registro" novalidate>
+        <div class="form-field">
+          <label for="reg-nombre">Nombre o apodo</label>
+          <input
+            type="text"
+            id="reg-nombre"
+            name="nombre"
+            placeholder="Ej: Juan Pérez"
+            required
+            autocomplete="name"
+          />
+          <div class="field-error" id="err-nombre">El nombre debe tener al menos 2 caracteres.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="reg-email">Correo electrónico</label>
+          <input
+            type="email"
+            id="reg-email"
+            name="email"
+            placeholder="tu@correo.com"
+            required
+            autocomplete="email"
+          />
+          <div class="field-error" id="err-email">Ingresa un correo válido.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="reg-password">Contraseña</label>
+          <input
+            type="password"
+            id="reg-password"
+            name="password"
+            placeholder="Mínimo 6 caracteres"
+            required
+            autocomplete="new-password"
+            minlength="6"
+          />
+          <div class="field-error" id="err-password">La contraseña debe tener al menos 6 caracteres.</div>
+        </div>
+
+        <div class="form-field">
+          <label for="reg-confirm">Confirmar contraseña</label>
+          <input
+            type="password"
+            id="reg-confirm"
+            name="confirm"
+            placeholder="Repite tu contraseña"
+            required
+            autocomplete="new-password"
+          />
+          <div class="field-error" id="err-confirm">Las contraseñas no coinciden.</div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-registro-submit">
+          Crear cuenta
+        </button>
+      </form>
+
+      <div class="auth-link-row">
+        ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+      </div>
+      <div class="auth-link-row" style="margin-top:8px;">
+        <a href="index.html" style="color: var(--muted); font-weight:400; font-size:13px;">← Volver al inicio</a>
+      </div>
+
+      <div class="trust-row">
+        <span class="trust-badge">🔒 Registro seguro</span>
+        <span>·</span>
+        <span class="trust-badge">✅ Sin costo</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script>
+    // ─── registro.html inline logic ────────────────────────────
+  
+    (function () {
+      const form       = document.getElementById("form-registro");
+      const nombreEl   = document.getElementById("reg-nombre");
+      const emailEl    = document.getElementById("reg-email");
+      const passEl     = document.getElementById("reg-password");
+      const confirmEl  = document.getElementById("reg-confirm");
+      const submitBtn  = document.getElementById("btn-registro-submit");
+      const alertBox   = document.getElementById("auth-alert");
+
+      function showAlert(msg, type = "error") {
+        alertBox.className = `auth-alert ${type}`;
+        alertBox.textContent = msg;
+      }
+      function clearAlert() {
+        alertBox.className = "auth-alert";
+        alertBox.textContent = "";
+      }
+      function setLoading(on) {
+        submitBtn.disabled = on;
+        submitBtn.classList.toggle("loading", on);
+        if (!on) submitBtn.textContent = "Crear cuenta";
+      }
+      function validateField(el, errId, test) {
+        const ok = test(el.value);
+        el.classList.toggle("error", !ok);
+        const errEl = document.getElementById(errId);
+        if (errEl) errEl.classList.toggle("show", !ok);
+        return ok;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearAlert();
+
+        // Validaciones locales
+        const nombreOk  = validateField(nombreEl,  "err-nombre",   (v) => v.trim().length >= 2);
+        const emailOk   = validateField(emailEl,   "err-email",    (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+        const passOk    = validateField(passEl,    "err-password", (v) => v.length >= 6);
+        const confirmOk = validateField(confirmEl, "err-confirm",  (v) => v === passEl.value);
+
+        if (!nombreOk || !emailOk || !passOk || !confirmOk) return;
+
+        setLoading(true);
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email:    emailEl.value.trim(),
+            password: passEl.value,
+            options: {
+              data: { nombre: nombreEl.value.trim() },
+            },
+          });
+
+          if (error) throw error;
+
+          // Supabase puede requerir confirmación de email
+          const needsConfirmation = !data.session;
+          if (needsConfirmation) {
+            showAlert(
+              "✅ ¡Cuenta creada! Revisa tu correo para confirmar tu registro y luego inicia sesión.",
+              "success"
+            );
+            submitBtn.textContent = "Cuenta creada ✔";
+            submitBtn.disabled = true;
+          } else {
+            showAlert("¡Registro exitoso! Redirigiendo…", "success");
+            setTimeout(() => { window.location.href = "index.html"; }, 1000);
+          }
+        } catch (err) {
+          const msg = err.message.includes("already registered")
+            ? "Este correo ya está registrado. ¿Quieres iniciar sesión?"
+            : err.message;
+          showAlert(msg, "error");
+          setLoading(false);
+        }
+      });
+
+      // Limpiar errores al escribir
+      [nombreEl, emailEl, passEl, confirmEl].forEach(el => {
+        el.addEventListener("input", () => {
+          el.classList.remove("error");
+          clearAlert();
+        });
+      });
+
+      // Validar confirmación en tiempo real
+      confirmEl.addEventListener("input", () => {
+        const ok = confirmEl.value === passEl.value;
+        confirmEl.classList.toggle("error", !ok && confirmEl.value.length > 0);
+        const errEl = document.getElementById("err-confirm");
+        if (errEl) errEl.classList.toggle("show", !ok && confirmEl.value.length > 0);
+      });
+
+      // Si ya hay sesión activa, redirigir
+      document.addEventListener("DOMContentLoaded", async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) window.location.href = "index.html";
+      });
+    })();
+  </script>
+</body>
+</html>
