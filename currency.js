@@ -9,8 +9,8 @@ const CACHE_EXPIRATION_MS = 60 * 60 * 1000; // 1 hora de caché
 
 // Variables en memoria
 window.appRates = {
-  USD: 1,      // Base de conversión (1 USD = X VES)
-  EUR: 1,      // (1 EUR = Y VES)
+  USD: 1,      // Tasa BCV Dólar
+  EUR: 1,      // Tasa BCV Euro
   loaded: false
 };
 
@@ -69,27 +69,27 @@ async function loadExchangeRates() {
 }
 
 /**
- * Convierte un precio desde su moneda base a USD, EUR y VES.
+ * Convierte un precio desde su moneda base a USD y VES.
  * @param {number} amount Monto original
- * @param {string} baseCurrency Moneda de origen ("USD", "EUR", "VES")
- * @returns {object} { USD, EUR, VES } numéricos
+ * @param {string} baseCurrency Moneda de origen ("USD", "USD_EUR", "VES")
+ * @returns {object} { USD, VES } numéricos
  */
 function convertPrice(amount, baseCurrency = "USD") {
   // Convertir primero a Bolívares (VES) como base intermedia
   let valueInVES = amount;
   if (baseCurrency === "USD") {
     valueInVES = amount * window.appRates.USD;
-  } else if (baseCurrency === "EUR") {
+  } else if (baseCurrency === "USD_EUR") {
     valueInVES = amount * window.appRates.EUR;
   }
 
-  // De Bolívares a Dólares y Euros
-  const valUSD = valueInVES / window.appRates.USD;
-  const valEUR = valueInVES / window.appRates.EUR;
+  // De Bolívares a Dólares siempre a la tasa con la que se compró o la tasa normal
+  // Para simplificar, el valor "USD" base de la aplicación se asume el mismo amount si es USD o USD_EUR
+  // Pero el valor en VES cambia.
+  const valUSD = (baseCurrency === "USD" || baseCurrency === "USD_EUR") ? amount : (valueInVES / window.appRates.USD);
 
   return {
     USD: valUSD,
-    EUR: valEUR,
     VES: valueInVES
   };
 }
@@ -100,8 +100,7 @@ function convertPrice(amount, baseCurrency = "USD") {
 function formatCurrency(amount, currencyStr) {
   let locale = "en-US";
   let cur = "USD";
-  if (currencyStr === "EUR") { locale = "es-ES"; cur = "EUR"; }
-  else if (currencyStr === "VES") { locale = "es-VE"; cur = "VES"; }
+  if (currencyStr === "VES") { locale = "es-VE"; cur = "VES"; }
   
   return new Intl.NumberFormat(locale, { 
     style: "currency", 
@@ -126,13 +125,12 @@ function getPriceHTML(amount, baseCurrency = "USD") {
   }
 
   let equivHTML = "";
-  if (baseCurrency === "USD") {
-    equivHTML = `<div class="prod-equiv" style="font-size:12px; color:var(--muted); margin-top:2px;">Bs. ${formatCurrency(converted.VES, 'VES').replace('Bs.', '').trim()} | ${formatCurrency(converted.EUR, 'EUR')}</div>`;
-  } else if (baseCurrency === "EUR") {
-    equivHTML = `<div class="prod-equiv" style="font-size:12px; color:var(--muted); margin-top:2px;">Bs. ${formatCurrency(converted.VES, 'VES').replace('Bs.', '').trim()} | ${formatCurrency(converted.USD, 'USD')}</div>`;
+  if (baseCurrency === "USD" || baseCurrency === "USD_EUR") {
+    let tasaLabel = baseCurrency === "USD_EUR" ? "tasa Euro" : "tasa BCV";
+    equivHTML = `<div class="prod-equiv" style="font-size:12px; color:var(--muted); margin-top:2px;">Bs. ${formatCurrency(converted.VES, 'VES').replace('Bs.', '').trim()} <span style="font-size:10px; opacity:0.7">(${tasaLabel})</span></div>`;
   } else {
     // Si la base fue VES
-    equivHTML = `<div class="prod-equiv" style="font-size:12px; color:var(--muted); margin-top:2px;">${formatCurrency(converted.USD, 'USD')} | ${formatCurrency(converted.EUR, 'EUR')}</div>`;
+    equivHTML = `<div class="prod-equiv" style="font-size:12px; color:var(--muted); margin-top:2px;">${formatCurrency(converted.USD, 'USD')}</div>`;
   }
 
   return `
