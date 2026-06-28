@@ -235,9 +235,19 @@
             <input type="text" id="titulo" placeholder="Ej: iPhone 14 Pro 256GB — negro" maxlength="120" required />
           </div>
 
-          <div class="vf-group">
-            <label for="precio">Precio (en tu moneda local) <span style="color:var(--danger)">*</span></label>
-            <input type="number" id="precio" placeholder="Ej: 5000" min="0" step="any" required />
+          <div class="vf-group" style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <div style="flex: 2;">
+              <label for="precio">Precio <span style="color:var(--danger)">*</span></label>
+              <input type="number" id="precio" placeholder="Ej: 50" min="0" step="any" required style="margin-bottom: 0;" />
+            </div>
+            <div style="flex: 1;">
+              <label for="moneda">Moneda <span style="color:var(--danger)">*</span></label>
+              <select id="moneda" required style="margin-bottom: 0;">
+                <option value="USD" selected>Dólares (USD)</option>
+                <option value="EUR">Euros (EUR)</option>
+                <option value="VES">Bolívares (VES)</option>
+              </select>
+            </div>
           </div>
 
           <div class="vf-group">
@@ -284,6 +294,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="currency.js"></script>
   <script src="auth.js"></script>
   <script src="vender.js"></script>
 </body>

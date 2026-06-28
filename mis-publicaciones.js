@@ -31,7 +31,7 @@ async function loadMyProducts() {
 
   const { data, error } = await supabase
     .from("productos")
-    .select("id, titulo, precio, categoria, imagen_url")
+    .select("id, titulo, precio, moneda, categoria, imagen_url")
     .eq("vendedor_id", currentUser.id)
     .order("created_at", { ascending: false });
 
@@ -62,7 +62,9 @@ async function loadMyProducts() {
         </div>
         <div class="mc-cat">${escHTML(p.categoria || "Sin categoría")}</div>
         <div class="mc-title">${escHTML(p.titulo)}</div>
-        <div class="mc-price">${formatPrice(p.precio)}</div>
+        <div class="mc-price" style="line-height: 1.2; padding-top: 4px;">
+          ${typeof getPriceHTML === "function" ? getPriceHTML(p.precio, p.moneda || "USD") : formatPrice(p.precio)}
+        </div>
         <button class="delete-btn" data-id="${p.id}" data-url="${imgSrc}" aria-label="Eliminar ${escHTML(p.titulo)}">
           🗑 Eliminar
         </button>
@@ -132,4 +134,12 @@ async function deleteProduct(id, imageUrl, cardEl) {
 
 document.addEventListener("DOMContentLoaded", () => {
   init();
+});
+
+// Actualizar si las tasas se cargan después
+window.addEventListener("ratesLoaded", () => {
+  const container = document.getElementById("my-products-container");
+  if (container && container.innerHTML.trim() !== "") {
+    loadMyProducts();
+  }
 });

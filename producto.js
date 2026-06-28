@@ -3,6 +3,7 @@
  * Carga y muestra los detalles de un producto específico basado en el ID en la URL.
  * Depende de auth.js (que expone `supabase` como variable global).
  */
+let currentProducto = null; // Para poder actualizar el precio si las tasas cargan tarde
 
 const formatPrice = (n) =>
   new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(n);
@@ -61,9 +62,16 @@ async function loadProductDetails() {
       imgEl.style.display = 'none';
     }
 
+    currentProducto = producto;
     document.getElementById('prod-cat').textContent = producto.categoria || '';
     document.getElementById('prod-titulo').textContent = producto.titulo;
-    document.getElementById('prod-precio').textContent = formatPrice(producto.precio);
+    
+    const precioContainer = document.getElementById('prod-precio');
+    if (typeof getPriceHTML === "function") {
+      precioContainer.innerHTML = getPriceHTML(producto.precio, producto.moneda || "USD");
+    } else {
+      precioContainer.textContent = formatPrice(producto.precio);
+    }
     
     if (producto.descripcion) {
       document.getElementById('prod-desc').textContent = producto.descripcion;
@@ -104,4 +112,14 @@ async function loadProductDetails() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadProductDetails();
+});
+
+// Actualizar precio si las tasas se cargan después
+window.addEventListener("ratesLoaded", () => {
+  if (currentProducto && typeof getPriceHTML === "function") {
+    const precioContainer = document.getElementById('prod-precio');
+    if (precioContainer) {
+      precioContainer.innerHTML = getPriceHTML(currentProducto.precio, currentProducto.moneda || "USD");
+    }
+  }
 });

@@ -80,6 +80,7 @@ async function handleSubmit(e) {
 
   const titulo      = document.getElementById("titulo")?.value.trim();
   const precioInput = document.getElementById("precio")?.value;
+  const moneda      = document.getElementById("moneda")?.value || "USD";
   const categoria   = document.getElementById("categoria")?.value;
   const descripcion = document.getElementById("descripcion")?.value.trim() || "";
   const fileInput   = document.getElementById("imagen");
@@ -108,13 +109,16 @@ async function handleSubmit(e) {
   if (btn) { btn.disabled = true; btn.classList.add("loading"); }
 
   try {
+    showAlert("Comprimiendo imagen...", "success");
     // ── 4a. Subir imagen a Supabase Storage ──────────────────
-    const ext      = file.name.split(".").pop().toLowerCase();
+    const compressedFile = await compressImage(file, 800, 800, 0.7);
+    const ext      = "webp";
     const fileName = `productos/${currentUser.id}_${Date.now()}.${ext}`;
 
+    showAlert("Subiendo imagen...", "success");
     const { error: uploadError } = await supabase.storage
       .from("imagenes")
-      .upload(fileName, file, { cacheControl: "3600", upsert: false });
+      .upload(fileName, compressedFile, { cacheControl: "3600", upsert: false });
 
     if (uploadError) throw uploadError;
 
@@ -127,6 +131,7 @@ async function handleSubmit(e) {
     const { error: dbError } = await supabase.from("productos").insert([{
       titulo:      titulo,
       precio:      precio,
+      moneda:      moneda,
       categoria:   categoria,
       descripcion: descripcion,
       imagen_url:  publicUrl,
@@ -144,6 +149,49 @@ async function handleSubmit(e) {
     showAlert("❌ Error al publicar: " + (err.message || "Inténtalo de nuevo."), "error");
     if (btn) { btn.disabled = false; btn.classList.remove("loading"); }
   }
+}
+
+// ── 5. Helper para comprimir imagen (Client-side) ─────────────
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return reject(new Error("Error al comprimir la imagen"));
+          const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".webp"), {
+            type: "image/webp",
+            lastModified: Date.now()
+          });
+          resolve(newFile);
+        }, "image/webp", quality);
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
 }
 
 // ── Boot ──────────────────────────────────────────────────────
