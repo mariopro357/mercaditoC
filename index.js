@@ -18,9 +18,12 @@ const escHTML = (s = "") =>
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
 // ── Renderizar una tarjeta de producto ────────────────────────
-function renderCard(p) {
+function renderCard(p, index = 0) {
+  const isLcp = index < 8; // Las primeras 8 imágenes cargan con prioridad
+  const loadingAttr = isLcp ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"';
+
   const imgContent = p.imagen_url
-    ? `<img src="${escHTML(p.imagen_url)}" alt="${escHTML(p.titulo)}" loading="lazy" onerror="this.closest('.prod-card').remove();" />`
+    ? `<img src="${escHTML(p.imagen_url)}" alt="${escHTML(p.titulo)}" ${loadingAttr} onerror="this.closest('.prod-card').remove();" />`
     : `<span class="no-img">🖼️</span>`;
 
   return `
@@ -86,7 +89,7 @@ async function cargarProductos(query = "", categoria = "todos") {
     if (!grid) return;
 
     if (productos && productos.length > 0) {
-      grid.innerHTML = productos.map(renderCard).join("");
+      grid.innerHTML = productos.map((p, i) => renderCard(p, i)).join("");
       if (countEl) countEl.textContent = `${productos.length} producto${productos.length !== 1 ? "s" : ""} encontrado${productos.length !== 1 ? "s" : ""}`;
     } else {
       grid.innerHTML = `

@@ -604,13 +604,41 @@ img { max-width: 100%; display: block; }
 .toast.error   { background: var(--danger);  }
 @keyframes slideIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
-/* â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width: 640px) {
-  .topbar .row { flex-wrap: wrap; }
-  .search-form { order: 3; flex-basis: 100%; max-width: 100%; }
-  .logo { flex: 1; }
-  .auth-box { padding: 24px 18px; }
-  .products-grid { grid-template-columns: repeat(2, 1fr); }
+  .topbar .row { flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
+  .search-form { order: 3; flex-basis: 100%; max-width: 100%; margin-top: 4px; }
+  .search-form input { padding: 10px 12px; font-size: 14px; }
+  .search-form button { padding: 10px 14px; font-size: 13px; }
+  
+  .logo { flex: 1; font-size: 18px; gap: 6px; }
+  .logo .logo-mark { width: 30px; height: 30px; font-size: 16px; border-radius: 6px; }
+  
+  .btn-nav { padding: 6px 12px; font-size: 12px; }
+  .btn-user-menu { padding: 6px 10px; font-size: 12px; gap: 4px; }
+  .btn-user-menu .avatar { width: 22px; height: 22px; font-size: 10px; }
+
+  .layout { padding: 16px 12px; gap: 16px; }
+
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .prod-body { padding: 10px; gap: 4px; }
+  .prod-title { font-size: 13px; -webkit-line-clamp: 2; line-height: 1.25; }
+  .prod-price { font-size: 16px; margin-top: 4px; }
+  .prod-actions { flex-direction: column; gap: 6px; margin-top: 8px; }
+  .btn-whatsapp, .btn-detail { padding: 8px 10px; font-size: 12px; width: 100%; justify-content: center; }
+  
+  .hero { padding: 24px 16px; }
+  .hero h1 { font-size: 20px; }
+  .hero p { font-size: 13px; }
+  
+  .cat-bar .row { padding: 8px 16px; gap: 6px; }
+  .cat-pill { padding: 6px 12px; font-size: 12px; }
+  
+  .auth-box { padding: 28px 20px; }
+  .auth-box h2 { font-size: 20px; }
+  
+  .footer { padding: 24px 16px; }
+  .footer .inner { grid-template-columns: 1fr; gap: 20px; text-align: center; }
 }
 
 /* Ajuste rápido en tu CSS */
